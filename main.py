@@ -8,6 +8,7 @@ from telegram.ext import (CallbackContext, CommandHandler, Updater)
 import config
 
 TELEGRAM_TOKEN = config.token
+secret = config.secret
 
 updater = Updater(TELEGRAM_TOKEN, use_context=True)
 dispatcher = updater.dispatcher
@@ -34,16 +35,27 @@ def schedule_check(context: CallbackContext, update: Update) -> None:
     url = f"https://schedule.mirea.ninja/api/schedule/teacher/Карпов"
     teacher_schedule = fetch(url)
     if teacher_schedule is None:
-        context.bot.send_message(chat_id=update.message.chat_id, text="Api ❌")
+        check(update, context)
+        refresh_schedule(context, update)
+
+
+def refresh_schedule(context: CallbackContext, update: Update) -> None:
+    url = f"https://schedule.mirea.ninja/api/refresh?secret_key={secret}"
+    headers = {"accept": "application/json"}
+    data = {}
+    response = requests.post(url, headers=headers, data=data)
+    context.bot.send_message(chat_id=update.message.chat_id, text="Расписание обновлено")
+    check(update, context)
+    return response.json()
 
 
 def check(update: Update, context: CallbackContext) -> None:
     url = f"https://schedule.mirea.ninja/api/schedule/teacher/Карпов"
     teacher_schedule = fetch(url)
     if teacher_schedule is None:
-        update.message.reply_text("Api ❌")
+        context.bot.send_message(chat_id=update.message.chat_id, text="Api ❌")
     else:
-        update.message.reply_text("Api ✅")
+        context.bot.send_message(chat_id=update.message.chat_id, text="Api ✅")
 
 
 def start_check(update: Update, context: CallbackContext) -> None:
