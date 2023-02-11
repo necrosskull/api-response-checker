@@ -74,7 +74,6 @@ def start_check(update: Update, context: CallbackContext) -> None:
         scheduler.add_job(schedule_check, 'interval', [context, update], seconds=30, id=str(update.message.chat_id))
 
 
-
 def stop_check(update: Update, context: CallbackContext) -> None:
     if scheduler.get_job(str(update.message.chat_id)):
         scheduler.remove_job(str(update.message.chat_id))
