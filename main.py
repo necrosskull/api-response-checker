@@ -9,11 +9,13 @@ import config
 
 TELEGRAM_TOKEN = config.token
 secret = config.secret
+admin_chat_id = int(config.admin_chat_id)
 
 updater = Updater(TELEGRAM_TOKEN, use_context=True)
 dispatcher = updater.dispatcher
 
 scheduler = BackgroundScheduler(timezone=pytz.timezone('Europe/Moscow'))
+scheduler.start()
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -59,17 +61,27 @@ def check(update: Update, context: CallbackContext) -> None:
 
 
 def start_check(update: Update, context: CallbackContext) -> None:
-    context.bot.send_message(chat_id=update.message.chat_id, text="Запущена проверка")
-    check(update, context)
+    if update.message.chat_id != admin_chat_id:
+        context.bot.send_message(chat_id=update.message.chat_id, text="В этом чате запускать проверку нельзя")
+        return
 
-    scheduler.add_job(schedule_check, 'interval', [context, update], seconds=30, id=str(update.message.chat_id))
-    scheduler.start()
+    job = scheduler.get_job(str(update.message.chat_id))
+    if job:
+        context.bot.send_message(chat_id=update.message.chat_id, text="Проверка уже запущена")
+    else:
+        context.bot.send_message(chat_id=update.message.chat_id, text="Запущена проверка")
+        check(update, context)
+        scheduler.add_job(schedule_check, 'interval', [context, update], seconds=30, id=str(update.message.chat_id))
+
 
 
 def stop_check(update: Update, context: CallbackContext) -> None:
-    context.bot.send_message(chat_id=update.message.chat_id, text="Проверка остановлена")
-    check(update, context)
-    scheduler.remove_job(str(update.message.chat_id))
+    if scheduler.get_job(str(update.message.chat_id)):
+        scheduler.remove_job(str(update.message.chat_id))
+        context.bot.send_message(chat_id=update.message.chat_id, text="Проверка остановлена")
+        check(update, context)
+    else:
+        context.bot.send_message(chat_id=update.message.chat_id, text="Проверка не была запущена")
 
 
 def main():
