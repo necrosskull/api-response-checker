@@ -75,7 +75,7 @@ def start_check(update: Update, context: CallbackContext) -> None:
     else:
         context.bot.send_message(chat_id=update.message.chat_id, text="Запущена проверка")
         check(update, context)
-        scheduler.add_job(schedule_check, 'interval', [context, update], seconds=30, id=str(update.message.chat_id),
+        scheduler.add_job(schedule_check, 'interval', [context, update], seconds=35, id=str(update.message.chat_id),
                           max_instances=1)
 
 
