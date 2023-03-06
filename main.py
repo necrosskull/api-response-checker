@@ -37,8 +37,12 @@ def schedule_check(context: CallbackContext, update: Update) -> None:
     url = f"https://schedule.mirea.ninja/api/schedule/teacher/Карпов"
     teacher_schedule = fetch(url)
     if teacher_schedule is None:
-        check(update, context)
-        refresh_schedule(context, update)
+        teacher_schedule = fetch(url)
+        if teacher_schedule is None:
+            context.bot.send_message(chat_id=update.message.chat_id, text="Api ❌")
+            refresh_schedule(context, update)
+        else:
+            context.bot.send_message(chat_id=update.message.chat_id, text="Api ✅ я просто сошел с ума")
 
 
 def refresh_schedule(context: CallbackContext, update: Update) -> None:
@@ -71,7 +75,8 @@ def start_check(update: Update, context: CallbackContext) -> None:
     else:
         context.bot.send_message(chat_id=update.message.chat_id, text="Запущена проверка")
         check(update, context)
-        scheduler.add_job(schedule_check, 'interval', [context, update], seconds=30, id=str(update.message.chat_id))
+        scheduler.add_job(schedule_check, 'interval', [context, update], seconds=30, id=str(update.message.chat_id),
+                          max_instances=1)
 
 
 def stop_check(update: Update, context: CallbackContext) -> None:
