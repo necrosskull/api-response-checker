@@ -24,15 +24,6 @@ def start(update: Update, context: CallbackContext) -> None:
         'автоматической проверки напиши /start_check\nДля остановки автоматической проверки напиши /stop')
 
 
-def fetch(url: str) -> dict:
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException:
-        return None
-
-
 def schedule_check(context: CallbackContext, update: Update) -> None:
     url = f"https://schedule.mirea.ninja/api/schedule/teacher/Карпов"
     teacher_schedule = fetch(url)
@@ -55,6 +46,15 @@ def refresh_schedule(context: CallbackContext, update: Update) -> None:
     return response.json()
 
 
+def fetch(url: str) -> dict:
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException:
+        return None
+
+
 def check(update: Update, context: CallbackContext) -> None:
     url = f"https://schedule.mirea.ninja/api/schedule/teacher/Карпов"
     teacher_schedule = fetch(url)
@@ -66,7 +66,7 @@ def check(update: Update, context: CallbackContext) -> None:
 
 def start_check(update: Update, context: CallbackContext) -> None:
     if update.message.chat_id != admin_chat_id:
-        context.bot.send_message(chat_id=update.message.chat_id, text="В этом чате запускать проверку нельзя")
+        context.bot.send_message(chat_id=update.message.chat_id, text="Проверка вам не доступна")
         return
 
     job = scheduler.get_job(str(update.message.chat_id))
