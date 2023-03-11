@@ -33,26 +33,9 @@ def fetch(url: str) -> dict:
         return None
 
 
-def schedule_check(context: CallbackContext, update: Update) -> None:
-    url = f"https://schedule.mirea.ninja/api/schedule/teacher/Карпов"
-    teacher_schedule = fetch(url)
-    if teacher_schedule is None:
-        teacher_schedule = fetch(url)
-        if teacher_schedule is None:
-            context.bot.send_message(chat_id=update.message.chat_id, text="Api ❌")
-            refresh_schedule(context, update)
-        else:
-            context.bot.send_message(chat_id=update.message.chat_id, text="Api ✅ я просто сошел с ума")
 
 
-def refresh_schedule(context: CallbackContext, update: Update) -> None:
-    url = f"https://schedule.mirea.ninja/api/refresh?secret_key={secret}"
-    headers = {"accept": "application/json"}
-    data = {}
-    response = requests.post(url, headers=headers, data=data)
-    context.bot.send_message(chat_id=update.message.chat_id, text="Расписание обновлено")
-    check(update, context)
-    return response.json()
+
 
 
 def check(update: Update, context: CallbackContext) -> None:
